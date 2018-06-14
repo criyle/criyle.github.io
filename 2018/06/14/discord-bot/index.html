@@ -5,15 +5,19 @@
   
 
   
-  <title>Lonely World</title>
+  <title>A discord bot for Bilibili | Lonely World</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="Lonely World">
-<meta property="og:url" content="http://criyle.github.io/index.html">
+  <meta name="description" content="GitHub: DiscordBilibiliBot After about one month of development, this discord bot finally have the expected behavior, but it still need some polishment. Reason for developing such a botThere are lots">
+<meta property="og:type" content="article">
+<meta property="og:title" content="A discord bot for Bilibili">
+<meta property="og:url" content="http://criyle.github.io/2018/06/14/discord-bot/index.html">
 <meta property="og:site_name" content="Lonely World">
+<meta property="og:description" content="GitHub: DiscordBilibiliBot After about one month of development, this discord bot finally have the expected behavior, but it still need some polishment. Reason for developing such a botThere are lots">
 <meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2018-06-14T17:09:45.690Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Lonely World">
+<meta name="twitter:title" content="A discord bot for Bilibili">
+<meta name="twitter:description" content="GitHub: DiscordBilibiliBot After about one month of development, this discord bot finally have the expected behavior, but it still need some polishment. Reason for developing such a botThere are lots">
   
     <link rel="alternate" href="/atom.xml" title="Lonely World" type="application/atom+xml">
   
@@ -62,9 +66,7 @@
   </div>
 </header>
       <div class="outer">
-        <section id="main">
-  
-    <article id="post-discord-bot" class="article article-type-post" itemscope itemprop="blogPost">
+        <section id="main"><article id="post-discord-bot" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2018/06/14/discord-bot/" class="article-date">
   <time datetime="2018-06-14T15:09:03.000Z" itemprop="datePublished">2018-06-14</time>
@@ -77,8 +79,8 @@
       <header class="article-header">
         
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/06/14/discord-bot/">A discord bot for Bilibili</a>
+    <h1 class="article-title" itemprop="name">
+      A discord bot for Bilibili
     </h1>
   
 
@@ -89,11 +91,18 @@
         <p>GitHub: <a href="https://github.com/criyle/DiscordBilibiliBot" target="_blank" rel="noopener">DiscordBilibiliBot</a></p>
 <p>After about one month of development, this discord bot finally have the expected behavior, but it still need some polishment.</p>
 <h2 id="Reason-for-developing-such-a-bot"><a href="#Reason-for-developing-such-a-bot" class="headerlink" title="Reason for developing such a bot"></a>Reason for developing such a bot</h2><p>There are lots of discord bots that plays YouTube wideos as audio in discord audio channel, but there were not decent ones for Bilibili. Since I am a fan of Vocaloid China mainly posted on Bilibili, I started writing this bot.</p>
-        
-          <p class="article-more-link">
-            <a href="/2018/06/14/discord-bot/#more">Read More</a>
-          </p>
-        
+<a id="more"></a>
+<p>Why Python?</p>
+<p><del>Python No. 1. LOL</del> Python is a script-based language that can scale easily and there is also HTTP libraries</p>
+<h2 id="Details"><a href="#Details" class="headerlink" title="Details"></a>Details</h2><p>I have spend plenty of time to reverse engineering the JavaScript for the <code>video.js</code> for the bilibili video site, but it truns out the 40k lines of JavaScript used many anti reverse engineering strategies, such as renaming and virtualization.</p>
+<p>After I gave up, I googled for the <code>APP_KEY</code> used by bilibili and I found the <code>APP_SECRET</code> directly in <code>youtube_dl</code> project… Curretly, bilibili is tring to speed up loading time, the video address is embaded into HTML, initialed by <code>window.__playinfo__</code>…</p>
+<p>The current process to download the video is:</p>
+<p>Download HTML -&gt; Get <code>window.__INITIAL_STATE__</code> to parse <code>cid</code> -&gt; interface api get video url</p>
+<p>And to convert video into audio, used <code>ffmpeg</code> to decode and <code>atomicparsley</code> to add meta data.</p>
+<p>All network operations are done by asynchronized calls(<code>asyncio</code>, <code>aiohttp</code>), and blocking operations are done by multithreading(<code>threading</code>)</p>
+<p>Last, using what I have learnt in the past, I wrote <code>fabric</code> for deployment and <code>supervisor</code> for deamon runner</p>
+<h2 id="In-the-Last"><a href="#In-the-Last" class="headerlink" title="In the Last"></a>In the Last</h2><p>It is much easier than what I have thought. Maybe I need some courage to start…</p>
+
       
     </div>
     <footer class="article-footer">
@@ -103,53 +112,19 @@
     </footer>
   </div>
   
-</article>
-
-
+    
+<nav id="article-nav">
   
-    <article id="post-test" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2018/06/11/test/" class="article-date">
-  <time datetime="2018-06-11T23:41:09.000Z" itemprop="datePublished">2018-06-11</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/06/11/test/">Hello World</a>
-    </h1>
+    <a href="/2018/06/11/test/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Hello World</div>
+    </a>
   
+</nav>
 
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="Hello-World"><a href="#Hello-World" class="headerlink" title="Hello World"></a>Hello World</h2><p>Adapted to using Hexo.</p>
-<p><code>inline code</code></p>
-<p>C++ Highlight</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="keyword">int</span> a, b;</span><br><span class="line">  <span class="built_in">cin</span> &gt;&gt; a &gt;&gt; b;</span><br><span class="line">  <span class="built_in">cout</span> &lt;&lt; a + b &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>Python Highlight</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">a, b = map(int, input().split(<span class="string">' '</span>))</span><br><span class="line">print(a + b)</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://criyle.github.io/2018/06/11/test/" data-id="cjieojvx90002h7wo0xakdc5h" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
   
 </article>
-
-
-  
-
 
 </section>
         
