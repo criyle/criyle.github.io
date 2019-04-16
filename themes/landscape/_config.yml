@@ -2,6 +2,7 @@
 menu:
   Home: /
   Archives: /archives
+  About Me: /about
 rss: /atom.xml
 
 # Content
@@ -11,11 +12,11 @@ fancybox: true
 # Sidebar
 sidebar: right
 widgets:
-- category
-- tag
-- tagcloud
+#- category
+#- tag
+#- tagcloud
 - archive
-- recent_posts
+#- recent_posts
 
 # display widgets at the bottom of index pages (pagination == 2)
 index_widgets:
