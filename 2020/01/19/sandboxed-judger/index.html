@@ -46,18 +46,18 @@
   };
 </script>
 
-  <meta name="description" content="Reimplement of UOJ run program in GO: go-judger. Start after I found libseccomp that uses seccomp filter introduced in linux 3.8 (2013). Since I have participated that project (uoj) only a little, I d">
+  <meta name="description" content="It have been a long time after last post and the sandbox technology have been improved a lot. By combining unix socket and container pooling from vijos&#x2F;jd4 and cgroup checking and unshare container fr">
 <meta property="og:type" content="article">
-<meta property="og:title" content="A GO reimplement of UOJ judger">
-<meta property="og:url" content="http:&#x2F;&#x2F;criyle.github.io&#x2F;2019&#x2F;04&#x2F;13&#x2F;uoj-judger&#x2F;index.html">
+<meta property="og:title" content="Running a judger inside a container sandbox">
+<meta property="og:url" content="http:&#x2F;&#x2F;criyle.github.io&#x2F;2020&#x2F;01&#x2F;19&#x2F;sandboxed-judger&#x2F;index.html">
 <meta property="og:site_name" content="Lonely World">
-<meta property="og:description" content="Reimplement of UOJ run program in GO: go-judger. Start after I found libseccomp that uses seccomp filter introduced in linux 3.8 (2013). Since I have participated that project (uoj) only a little, I d">
-<meta property="article:published_time" content="2019-04-14T00:51:44.000Z">
-<meta property="article:modified_time" content="2020-01-20T01:04:57.195Z">
+<meta property="og:description" content="It have been a long time after last post and the sandbox technology have been improved a lot. By combining unix socket and container pooling from vijos&#x2F;jd4 and cgroup checking and unshare container fr">
+<meta property="article:published_time" content="2020-01-20T00:19:08.000Z">
+<meta property="article:modified_time" content="2020-01-20T01:24:27.877Z">
 <meta property="article:author" content="criyle">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="http://criyle.github.io/2019/04/13/uoj-judger/">
+<link rel="canonical" href="http://criyle.github.io/2020/01/19/sandboxed-judger/">
 
 
 <script id="page-configurations">
@@ -69,7 +69,7 @@
   };
 </script>
 
-  <title>A GO reimplement of UOJ judger | Lonely World</title>
+  <title>Running a judger inside a container sandbox | Lonely World</title>
   
 
 
@@ -173,7 +173,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="default">
-    <link itemprop="mainEntityOfPage" href="http://criyle.github.io/2019/04/13/uoj-judger/">
+    <link itemprop="mainEntityOfPage" href="http://criyle.github.io/2020/01/19/sandboxed-judger/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -186,7 +186,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          A GO reimplement of UOJ judger
+          Running a judger inside a container sandbox
         </h1>
 
         <div class="post-meta">
@@ -195,16 +195,10 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               <span class="post-meta-item-text">Posted on</span>
+              
 
-              <time title="Created: 2019-04-13 20:51:44" itemprop="dateCreated datePublished" datetime="2019-04-13T20:51:44-04:00">2019-04-13</time>
+              <time title="Created: 2020-01-19 19:19:08 / Modified: 20:24:27" itemprop="dateCreated datePublished" datetime="2020-01-19T19:19:08-05:00">2020-01-19</time>
             </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-01-19 20:04:57" itemprop="dateModified" datetime="2020-01-19T20:04:57-05:00">2020-01-19</time>
-              </span>
 
           
 
@@ -217,48 +211,32 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>Reimplement of UOJ run program in GO: <a href="https://github.com/criyle/go-judger" target="_blank" rel="noopener">go-judger</a>. Start after I found libseccomp that uses seccomp filter introduced in linux 3.8 (2013). Since I have participated that project (<a href="https://github.com/vfleaking/uoj" target="_blank" rel="noopener">uoj</a>) only a little, I decided to try to do some contributions.</p>
-<h2 id="Original-implements"><a href="#Original-implements" class="headerlink" title="Original implements"></a>Original implements</h2><p>The original run program restricted resources (CPU, memory, output) and file access by <code>ptrace</code>. Including following steps:</p>
-<p>Setup up step after fork in child:</p>
-<ol>
-<li>Set resource limits by <code>setrlimit</code></li>
-<li>Set environment variables</li>
-<li>Set input / output files</li>
-<li><code>execv</code></li>
-</ol>
-<p>Tracing after fork in parent:</p>
-<p>Setup <code>ptrace</code> options when trapped at <code>execv</code></p>
-<ol>
-<li><code>wait4</code> at syscall entrance</li>
-<li>Check resource usage, wait status, signals and syscall black list to determine terminate or soft ban</li>
-<li><code>ptrace syscall</code> enter syscall</li>
-<li><code>wait4</code> at syscall exits</li>
-<li>Set syscall return value</li>
-<li><code>ptrace syscall</code> exit syscall</li>
-</ol>
-<p>In this scenario, the traced process required to stop for each syscall and for both entrance and exiting. For harmless syscalls (e.g. <code>brk</code>, <code>read</code>), this introduces some resource overhead.</p>
-<h2 id="Reimplements"><a href="#Reimplements" class="headerlink" title="Reimplements"></a>Reimplements</h2><p>For the newly implemented <code>seccomp</code> BPF filter provided by <code>libseccomp</code>, this kind of syscall will handled by the kernel to avoid too much context switch. Also, for a single traced syscall, <code>seccomp</code> will only be triggered once.</p>
-<p>Thus, the new implement becomes.</p>
-<p>Setup step after fork in child:</p>
-<ol>
-<li>Set resource limits by <code>setrlimit</code></li>
-<li>Set input / output files</li>
-<li>Load <code>seccomp</code> filter</li>
-<li>Stop itself by <code>SIGSTOP</code></li>
-<li><code>execve</code> with environment variables</li>
-</ol>
-<p>Tracing after fork in parent:</p>
-<p>Setup <code>ptrace</code> options when trapped by <code>SIGSTOP</code></p>
-<ol>
-<li><code>wait4</code> at seccomp event</li>
-<li>Check resource usage, wait status, signals, and call syscall event handles. Handle determins whether to terminates or soft ban</li>
-<li><code>ptrace continue</code> enter syscall</li>
-</ol>
-<p>Notice that <code>SIGSTOP</code> before <code>execve</code> is required since if <code>execve</code> is traced but the <code>ptrace</code> option have not set up yet, <code>ENOSYS</code> will returned to <code>execve</code>. Safe syscalls was allowed by the filter so there is no <code>ptrace</code> event triggered by safe syscalls.</p>
-<p>Also, by setting syscall number to <code>-1</code> and return value to the register, the soft ban mechanism becomes much efficient.</p>
-<p>With all that implemented, <code>process_vm_readv</code> is used to speed up copy syscall argument instead of <code>ptrace peekdata</code>.</p>
-<h2 id="Conclusion"><a href="#Conclusion" class="headerlink" title="Conclusion"></a>Conclusion</h2><p>In conclusion, by restrict CPU time, memory, output, syscalls and file access, run program is able to block potential attacks.</p>
-<p>Since GO language does not provides official implements for <code>fork</code> for runtime duplication issue, it took some time to figure out the usage of raw syscall interface. Because after fork in child, I cannot call any go function, I did buffed the seccomp filter to allow load it after fork. Also, <code>process_vm_readv</code> is not provided so I wrote a wrapper for it.</p>
+        <p>It have been a long time after last post and the sandbox technology have been improved a lot. By combining unix socket and container pooling from <a href="https://github.com/vijos/jd4" target="_blank" rel="noopener">vijos/jd4</a> and cgroup checking and unshare container from <a href="https://github.com/syzoj/judge-v3" target="_blank" rel="noopener">syzoj/judge-v3</a>, the judge is able to safely run arbitrary code in isolated environment.</p>
+<h2 id="Design-of-judge-v3-and-jd4"><a href="#Design-of-judge-v3-and-jd4" class="headerlink" title="Design of judge-v3 and jd4"></a>Design of judge-v3 and jd4</h2><p>In the design of <code>judge-v3</code>, The daemon receives task from website and then pass into runner to execute. The runner would start the running task through simple-sandbox. The simple-sandbox run a program requires creating / destroying containers repeatedly. The container is created through a dedicated readonly rootfs with bind mounting output directories. The container is created through unshare and chroot and privilege is dropped by changing process user.</p>
+<p>In the design of <code>jd4</code>, containers are created in advance through fork and unshare. File system is shared through read-only or read-write output bind mounts to the host file system. Child process inside the container is connected through a unix socket and controlled through a RPC interface. New process pid is passed by creating new unix socket as file inside the bind mount and the process pass credential through oob data. The lifetime of the new process is managed through the parent process.</p>
+<h2 id="Design-of-pre-forked-GO-sandbox"><a href="#Design-of-pre-forked-GO-sandbox" class="headerlink" title="Design of pre-forked GO-sandbox"></a>Design of pre-forked GO-sandbox</h2><p>By taking the design of both implementation, the <code>go-sandbox</code> chooses dumb, pre-forked and isolated runner. The file system of the sandbox is created through read-only bind mounting from host file system with 2 small tmpfs. Command is passed through a unix socket pair together with files and child pid. To ensure security, the privilege is dropped through changing process user or set capabilities.</p>
+<p>The RPC interface between host and container daemon are:</p>
+<ul>
+<li><code>ping</code>: alive check</li>
+<li><code>conf</code>: set the running configuration (user / group)</li>
+<li><code>open</code>: open / create multiple files inside the container</li>
+<li><code>delete</code>: unlink / rmdir file inside the container</li>
+<li><code>reset</code>: remove all files under /w and /tmp</li>
+<li><code>execve</code>: execute and wait single process inside the container</li>
+</ul>
+<h2 id="Potential-attacks"><a href="#Potential-attacks" class="headerlink" title="Potential attacks"></a>Potential attacks</h2><ul>
+<li>forever sleep: pooling through CPU usage and assumes at least 40% utilization</li>
+<li>creates arbitrary files: readonly &amp; tmpfs limited at 8MB</li>
+<li>large executable: tmpfs limited at 8MB</li>
+<li>c / c++ includes <code>/etc/passwd</code>: not bind mounted</li>
+<li>network download: unshared net</li>
+<li>overwrite <code>/proc/1/exe</code>: unprivileged</li>
+<li>open <code>/proc/1/fds/3</code>: unprivileged</li>
+<li>fork bomb: cgroup pid max</li>
+<li>large memory: cgroup memory</li>
+</ul>
+<h2 id="Design-of-GO-judge"><a href="#Design-of-GO-judge" class="headerlink" title="Design of GO-judge"></a>Design of GO-judge</h2><p>By taking the design from <code>judge-v3</code>, the <code>go-judge</code> have 2 layers. The client interface connect to the website to receive the tasks and test data. The first layer parses the task and data from the client interface and pass into the message queue interface for the runner. The runner receives run tasks from the queue and run through the <code>go-sandbox</code> and pass back the run results.</p>
+<h2 id="Conclusion"><a href="#Conclusion" class="headerlink" title="Conclusion"></a>Conclusion</h2><p>Long time not writing documents… I am too lazy…</p>
 
     </div>
 
@@ -274,13 +252,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2018/06/14/discord-bot/" rel="prev" title="A discord bot for Bilibili">
-      <i class="fa fa-chevron-left"></i> A discord bot for Bilibili
+    <a href="/2019/04/13/uoj-judger/" rel="prev" title="A GO reimplement of UOJ judger">
+      <i class="fa fa-chevron-left"></i> A GO reimplement of UOJ judger
     </a></div>
-      <div class="post-nav-item">
-    <a href="/2020/01/19/sandboxed-judger/" rel="next" title="Running a judger inside a container sandbox">
-      Running a judger inside a container sandbox <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -340,7 +315,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Original-implements"><span class="nav-number">1.</span> <span class="nav-text">Original implements</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Reimplements"><span class="nav-number">2.</span> <span class="nav-text">Reimplements</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Conclusion"><span class="nav-number">3.</span> <span class="nav-text">Conclusion</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Design-of-judge-v3-and-jd4"><span class="nav-number">1.</span> <span class="nav-text">Design of judge-v3 and jd4</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Design-of-pre-forked-GO-sandbox"><span class="nav-number">2.</span> <span class="nav-text">Design of pre-forked GO-sandbox</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Potential-attacks"><span class="nav-number">3.</span> <span class="nav-text">Potential attacks</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Design-of-GO-judge"><span class="nav-number">4.</span> <span class="nav-text">Design of GO-judge</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Conclusion"><span class="nav-number">5.</span> <span class="nav-text">Conclusion</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
