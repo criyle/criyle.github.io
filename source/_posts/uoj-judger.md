@@ -28,11 +28,11 @@ Setup `ptrace` options when trapped at `execv`
 5. Set syscall return value
 6. `ptrace syscall` exit syscall
 
-In this senario, the traced process required to stop for each syscall and for both entrance and exiting. For harmless syscalls (e.g. `brk`, `read`), this introduces some resource overhead.
+In this scenario, the traced process required to stop for each syscall and for both entrance and exiting. For harmless syscalls (e.g. `brk`, `read`), this introduces some resource overhead.
 
 ## Reimplements
 
-For the newly implemented `seccomp` BPF filter provided by `libseccomp`, this kind of syscall will handled by the kernel to avoid too much context switch. Also, for a single traced syscall, `seccomp` will only be triggled once.
+For the newly implemented `seccomp` BPF filter provided by `libseccomp`, this kind of syscall will handled by the kernel to avoid too much context switch. Also, for a single traced syscall, `seccomp` will only be triggered once.
 
 Thus, the new implement becomes.
 
@@ -54,12 +54,12 @@ Setup `ptrace` options when trapped by `SIGSTOP`
 
 Notice that `SIGSTOP` before `execve` is required since if `execve` is traced but the `ptrace` option have not set up yet, `ENOSYS` will returned to `execve`. Safe syscalls was allowed by the filter so there is no `ptrace` event triggered by safe syscalls.
 
-Also, by setting syscall number to `-1` and return value to the register, the soft ban mechanisn becomes much efficient.
+Also, by setting syscall number to `-1` and return value to the register, the soft ban mechanism becomes much efficient.
 
 With all that implemented, `process_vm_readv` is used to speed up copy syscall argument instead of `ptrace peekdata`.
 
-## Conclution
+## Conclusion
 
-In conclution, by restrict CPU time, memory, output, syscalls and file access, run program is able to block potential attacks.
+In conclusion, by restrict CPU time, memory, output, syscalls and file access, run program is able to block potential attacks.
 
 Since GO language does not provides official implements for `fork` for runtime duplication issue, it took some time to figure out the usage of raw syscall interface. Because after fork in child, I cannot call any go function, I did buffed the seccomp filter to allow load it after fork. Also, `process_vm_readv` is not provided so I wrote a wrapper for it.
