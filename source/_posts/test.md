@@ -8,6 +8,8 @@ tags:
 
 Adapted to using Hexo.
 
+<!--more-->
+
 `inline code`
 
 C++ Highlight

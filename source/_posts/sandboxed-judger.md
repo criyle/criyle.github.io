@@ -6,6 +6,8 @@ tags:
 
 It have been a long time after last post and the sandbox technology have been improved a lot. By combining unix socket and container pooling from [vijos/jd4](https://github.com/vijos/jd4) and cgroup checking and unshare container from [syzoj/judge-v3](https://github.com/syzoj/judge-v3), the judge is able to safely run arbitrary code in isolated environment.
 
+<!--more-->
+
 ## Design of judge-v3 and jd4
 
 In the design of `judge-v3`, The daemon receives task from website and then pass into runner to execute. The runner would start the running task through simple-sandbox. The simple-sandbox run a program requires creating / destroying containers repeatedly. The container is created through a dedicated readonly rootfs with bind mounting output directories. The container is created through unshare and chroot and privilege is dropped by changing process user.

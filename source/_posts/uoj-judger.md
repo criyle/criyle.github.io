@@ -6,6 +6,8 @@ tags:
 
 Reimplement of UOJ run program in GO: [go-judger](https://github.com/criyle/go-judger). Start after I found libseccomp that uses seccomp filter introduced in linux 3.8 (2013). Since I have participated that project ([uoj](https://github.com/vfleaking/uoj)) only a little, I decided to try to do some contributions.
 
+<!--more-->
+
 ## Original implements
 
 The original run program restricted resources (CPU, memory, output) and file access by `ptrace`. Including following steps:
