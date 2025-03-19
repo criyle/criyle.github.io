@@ -3,9 +3,9 @@ title: About Me
 date: 2018-06-11 20:21:42
 ---
 
-I am a first year master student studying computer science, and my research interest is in natural language processing and large language models. 
+I am a first year master student in computer science and engineering at The Ohio State University, and my research interest is in natural language processing, and large language models.
 
-I have developed [go-judge](https://github.com/criyle/go-judge) and [go-sandbox](https://github.com/criyle/go-sandbox) that supports multiple online judges for computer science education. Also, I participated the development of online judges including [Hydro](https://github.com/hydro-dev/Hydro) and [Universal Online Judge](https://github.com/vfleaking/uoj).
+I have developed [go-judge](https://github.com/criyle/go-judge) and [go-sandbox](https://github.com/criyle/go-sandbox) that supports multiple online judges for computer science education. Also, I participated the development of online judges including [Hydro](https://github.com/hydro-dev/Hydro), and [Universal Online Judge](https://github.com/vfleaking/uoj).
 
 #### Intro
 
